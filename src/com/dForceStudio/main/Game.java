@@ -11,11 +11,15 @@ import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import javax.swing.JFrame;
 
+import com.dForceStudio.entities.BulletShoot;
+import com.dForceStudio.entities.Enemy;
 import com.dForceStudio.entities.Entity;
 import com.dForceStudio.entities.Player;
+import com.dForceStudio.graphics.UI;
 import com.dForceStudio.world.World;
 
 import graphics.Spritesheet;
@@ -29,28 +33,38 @@ public class Game extends Canvas implements Runnable, KeyListener {
 	public static JFrame frame;
 	private boolean isRunning;
 	private Thread thread;
-	private final int WIDTH = 320;
-	private final int HEIGHT = 260;
+	public final static int WIDTH = 320;
+	public final static int HEIGHT = 160;
 	private final int SCALE = 3;
 
 	private BufferedImage image;
 	public static List<Entity> entities;
+	public static List<Enemy> enemies;
+	public static List<BulletShoot> bulletShoot;
 	public static Spritesheet spritesheet;
 	public static Player player;
 	public static World world;
+	public static Random rand;
+	public UI ui;
+	
 	
 
 	public Game() {
+		rand = new Random();
 		addKeyListener(this);
 		frame = new JFrame("Zelda dForce Studio");
 		this.setPreferredSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
 		initFrame();
+		ui = new UI();
 		image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
 		entities = new ArrayList<Entity>();
+		enemies = new ArrayList<Enemy>();
+		bulletShoot = new ArrayList<BulletShoot>();
 		spritesheet = new Spritesheet("/spritesheet.png");
 		player = new Player(0, 0, 16, 21, spritesheet.getSprite(48, 1, 17, 23));
 		entities.add(player);
 		world = new World("/map.png");
+		
 		
 	}
 
@@ -90,6 +104,10 @@ public class Game extends Canvas implements Runnable, KeyListener {
 			Entity e = entities.get(i);
 			e.tick();
 		}
+		for(int i = 0; i < bulletShoot.size(); i++) {
+			bulletShoot.get(i).tick();
+		}
+		
 	}
 
 	public void render() {
@@ -99,14 +117,20 @@ public class Game extends Canvas implements Runnable, KeyListener {
 			return;
 		}
 		Graphics g = image.getGraphics();
+		
 		g.setColor(Color.BLACK);
 		g.fillRect(0, 0, WIDTH, HEIGHT);
 		world.render(g);
-
 		for(int i = 0; i < entities.size(); i++) {
 			Entity e = entities.get(i);
 			e.render(g);
 		}
+		
+		for(int i = 0; i < bulletShoot.size(); i++) {
+			bulletShoot.get(i).render(g);
+		}
+		ui.render(g);
+		
 
 		// para rotacionar
 		// Graphics2D g2 = (Graphics2D) g;
@@ -125,6 +149,7 @@ public class Game extends Canvas implements Runnable, KeyListener {
 		double delta = 0;
 		int frames = 0;
 		double timer = System.currentTimeMillis();
+		requestFocus();
 		while (isRunning) {
 			long now = System.nanoTime();
 			delta += (now - lastTime) / ns;
@@ -166,6 +191,9 @@ public class Game extends Canvas implements Runnable, KeyListener {
 		else if(e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_S) {
 			player.down = true;
 		}
+		if(e.getKeyCode() == KeyEvent.VK_Z) {
+			player.shoot = true;
+		}
 		
 	}
 
@@ -184,6 +212,7 @@ public class Game extends Canvas implements Runnable, KeyListener {
 		else if(e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_S) {
 			player.down = false;
 		}
+		
 		
 	}
 }
