@@ -10,11 +10,12 @@ import com.dForceStudio.world.Camera;
 import com.dForceStudio.world.World;
 
 import graphics.Spritesheet;
+import main.Sound;
 
 public class Enemy extends Entity {
 
 	private double speed = 1;
-	private int frames = 0, maxFrames = 5, index = 0, maxIndex = 3, life = 2, enemyKill = 0;
+	private int frames = 0, maxFrames = 5, index = 0, maxIndex = 3, life = 6;
 	private boolean isDamaged = false;
 	private int damageFrames = 10, damageCurrent = 0;
 
@@ -34,22 +35,22 @@ public class Enemy extends Entity {
 	public void tick() {
 		if (this.isColidingToPlayer() == false) {
 			if (Game.rand.nextInt(100) < 70) {
-				if ((int) x < Game.player.getX() && World.isFree((int) (x + speed), this.getY())
+				if ((int) x < Game.player.getX() && World.isFree((int) (x + speed), this.getY(), 0)
 						&& !isColiding((int) (x + speed), this.getY())) {
 					x += speed;
 
 				}
-				if ((int) x > Game.player.getX() && World.isFree((int) (x - speed), this.getY())
+				if ((int) x > Game.player.getX() && World.isFree((int) (x - speed), this.getY(), 0)
 						&& !isColiding((int) (x - speed), this.getY())) {
 					x -= speed;
 
 				}
-				if ((int) y > Game.player.getY() && World.isFree(this.getX(), (int) (y - speed))
+				if ((int) y > Game.player.getY() && World.isFree(this.getX(), (int) (y - speed), 0)
 						&& !isColiding(this.getX(), (int) (y - speed))) {
 					y -= speed;
 
 				}
-				if ((int) y < Game.player.getY() && World.isFree(this.getX(), (int) (y + speed))
+				if ((int) y < Game.player.getY() && World.isFree(this.getX(), (int) (y + speed), 0)
 						&& !isColiding(this.getX(), (int) (y + speed))) {
 					y += speed;
 				} else {
@@ -91,7 +92,9 @@ public class Enemy extends Entity {
 	}
 
 	public void destroySelf() {
+		Game.enemies.remove(this);
 		Game.entities.remove(this);
+		Sound.damage.play();
 	}
 
 	public void colidingBullet() {

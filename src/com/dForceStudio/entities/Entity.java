@@ -21,6 +21,7 @@ public class Entity {
 	
 	protected int x;
 	protected int y;
+	protected int z;
 	protected int width;
 	protected int height;
 	private BufferedImage sprite;
@@ -68,7 +69,11 @@ public class Entity {
 	public static boolean isColiding(Entity e1, Entity e2) {
 		Rectangle e1Mask = new Rectangle(e1.getX(), e1.getY(), 16, 16);
 		Rectangle e2Mask = new Rectangle(e2.getX(), e2.getY(), 16, 16);
-		return e1Mask.intersects(e2Mask);
+		if(e1Mask.intersects(e2Mask) && e1.z == e2.z) {
+			return true;
+		}
+		
+		return false;
 	}
 	
 	public void render(Graphics g) {

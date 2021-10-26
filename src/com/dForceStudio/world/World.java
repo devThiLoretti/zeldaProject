@@ -3,6 +3,7 @@ package com.dForceStudio.world;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
@@ -10,8 +11,11 @@ import com.dForceStudio.entities.Bullets;
 import com.dForceStudio.entities.Enemy;
 import com.dForceStudio.entities.Entity;
 import com.dForceStudio.entities.LifePack;
+import com.dForceStudio.entities.Player;
 import com.dForceStudio.entities.Weapon;
 import com.dForceStudio.main.Game;
+
+import graphics.Spritesheet;
 
 public class World {
 	
@@ -62,6 +66,14 @@ public class World {
 						//bullets
 						Game.entities.add(new Bullets(xx*16, yy*16, 16, 16, Entity.bullet_en));
 					}
+					else if(pixels[xx + (yy*map.getWidth())] == 0xFF00FF21) {
+						//floor 2
+						tiles[xx + (yy*WIDTH)] = new FloorTile2(xx*16, yy*16, Tile.TILE_FLOOR2);
+					}
+					else if(pixels[xx + (yy*map.getWidth())] == 0xFFA3FF3A) {
+						//floor 3
+						tiles[xx + (yy*WIDTH)] = new FloorTile2(xx*16, yy*16, Tile.TILE_FLOOR3);
+					}
 					
 				}
 				}
@@ -72,7 +84,7 @@ public class World {
 		}
 	}
 	
-	public static boolean isFree(int xNext, int yNext) {
+	public static boolean isFree(int xNext, int yNext, int zPlayer) {
 		int x1 = xNext/TILE_SIZE;
 		int y1 = yNext/TILE_SIZE;
 		
@@ -85,11 +97,29 @@ public class World {
 		int x4 = (xNext + TILE_SIZE - 1)/TILE_SIZE;
 		int y4 = (yNext + TILE_SIZE + 5)/TILE_SIZE;
 		
-		return !((tiles[x1 + (y1*World.WIDTH)] instanceof WallTile) ||
+		if(!((tiles[x1 + (y1*World.WIDTH)] instanceof WallTile) ||
 				(tiles[x2 + (y2*World.WIDTH)] instanceof WallTile) ||
 				(tiles[x3 + (y3*World.WIDTH)] instanceof WallTile) ||
-				(tiles[x4 + (y4*World.WIDTH)] instanceof WallTile));
+				(tiles[x4 + (y4*World.WIDTH)] instanceof WallTile))) {
+			return true;
+	}	
+		if(zPlayer > 0) {
+			return true;
+		}
+		return false;
 	} 
+	
+	public static void restartGame(String level) {
+		Game.entities.clear();
+		Game.enemies.clear();
+		Game.entities = new ArrayList<Entity>();
+		Game.enemies = new ArrayList<Enemy>();
+		Game.spritesheet = new Spritesheet("/spritesheet.png");
+		Game.player = new Player(0, 0, 16, 21, Game.spritesheet.getSprite(48, 1, 17, 23));
+		Game.entities.add(Game.player);
+		Game.world = new World("/"+level);
+		return;
+	}
 	
 	public void render(Graphics g){
 		int xStart = Camera.x /16;
